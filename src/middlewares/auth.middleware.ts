@@ -1,8 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { IUser, User } from "../models/User";
-import { RESPONSES } from "../utils/responses";
+import { errorResponse, successResponse } from "../utils/responses";
 import jwt from "jsonwebtoken";
-
 export interface AuthRequest extends Request {
   user?: IUser;
 }
@@ -14,7 +13,7 @@ export const protect = async (
   const token = req.headers.authorization?.split(" ")[1];
 
   if (!token) {
-    return res.status(401).json(RESPONSES.UNAUTHORIZED);
+    return errorResponse(res, "Unauthorized");
   }
 
   try {
@@ -23,18 +22,16 @@ export const protect = async (
     };
     const user = await User.findById(decoded.id).select("+password");
     if (!user) {
-      res.status(404).json(RESPONSES.NOT_FOUND);
-      return;
+      return errorResponse(res, "User not found");
     }
     req.user = user;
     next();
-    if (user.estado === "inactive") {
-      res.status(403).json(RESPONSES.FORBIDDEN);
-      return;
+    if (user.estado === "inactivo") {
+      return errorResponse(res, "Forbidden");
     }
     req.user = user;
     next();
   } catch (error) {
-    return res.status(401).json(RESPONSES.UNAUTHORIZED);
+    return errorResponse(res, "Unauthorized");
   }
 };

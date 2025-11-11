@@ -5,10 +5,11 @@ export enum UserRoles {
   USER = "user",
 }
 export enum UserStatus {
-  ACTIVE = "active",
-  INACTIVE = "inactive",
+  ACTIVO = "activo",
+  INACTIVO = "inactivo",
 }
 export interface IUser extends Document {
+  _id: any;
   nombre: string;
   apellido: string;
   identificacion: string;
@@ -28,13 +29,13 @@ const userSchema = new Schema(
     identificacion: { type: String, required: true },
     correo: {
       type: String,
-      required: [true, "email is required"],
+      required: [true, "el correo es requerido"],
       unique: true,
-      match: [/^\S+@\S+\.\S+$/, "email is invalid"],
+      match: [/^\S+@\S+\.\S+$/, "correo es invalido"],
     },
     password: {
       type: String,
-      required: [true, "password is required"],
+      required: [true, "la contraseña es requerida"],
       minlength: 8,
     },
     rol: {
@@ -46,7 +47,7 @@ const userSchema = new Schema(
     estado: {
       type: String,
       enum: Object.values(UserStatus),
-      default: UserStatus.ACTIVE,
+      default: UserStatus.ACTIVO,
     },
     updatedAt: { type: Date, default: Date.now },
     createdAt: { type: Date, default: Date.now },

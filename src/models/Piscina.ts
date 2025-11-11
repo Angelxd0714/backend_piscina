@@ -205,6 +205,6 @@ const piscinaSchema = new Schema<IPiscina>(
   },
 );
 
-const piscinaModel = model<IPiscina>("Piscina", piscinaSchema);
+const Piscina = model<IPiscina>("Piscina", piscinaSchema);
 
-export default piscinaModel;
+export default Piscina;
