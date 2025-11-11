@@ -13,8 +13,8 @@ export interface IUser extends Document {
   apellido: string;
   identificacion: string;
   correo: string;
-  contraseña: string;
-  roles: UserRoles[];
+  contrasena: string;
+  rol: UserRoles;
   estado: UserStatus;
   updatedAt: Date;
   createdAt: Date;
@@ -32,14 +32,17 @@ const userSchema = new Schema(
       unique: true,
       match: [/^\S+@\S+\.\S+$/, "email is invalid"],
     },
-    contraseña: {
+    password: {
       type: String,
       required: [true, "password is required"],
       minlength: 8,
     },
-    roles: [
-      { type: String, enum: Object.values(UserRoles), default: UserRoles.USER },
-    ],
+    rol: {
+      type: String,
+      enum: Object.values(UserRoles),
+      default: UserRoles.USER,
+      required: true,
+    },
     estado: {
       type: String,
       enum: Object.values(UserStatus),
@@ -57,14 +60,14 @@ const userSchema = new Schema(
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
   const salt = await bcrypt.genSalt(10);
-  this.contraseña = await bcrypt.hash(this.contraseña, salt);
+  this.password = await bcrypt.hash(this.password, salt);
   next();
 });
 
 userSchema.methods.comparePassword = async function (
   password: string,
 ): Promise<boolean> {
-  return bcrypt.compare(password, this.contraseña);
+  return bcrypt.compare(password, this.password);
 };
 
 export const User = model<IUser>("User", userSchema);
