@@ -12,51 +12,54 @@ export const uploadFile = async (
   file: UploadedFile,
   folder = "uploads",
 ): Promise<{ url: string; publicId: string }> => {
-  console.log(process.env.CLOUDINARY_API_KEY);
-
   try {
+    console.log("📤 Subiendo archivo:", {
+      name: file.name,
+      size: file.size,
+      mimetype: file.mimetype,
+      tempFilePath: file.tempFilePath,
+      folder,
+    });
+
+    if (!file.tempFilePath) {
+      throw new Error(
+        "Archivo sin ruta temporal. Verifica express-fileupload con useTempFiles: true",
+      );
+    }
+
     const result = await cloudinary.v2.uploader.upload(file.tempFilePath, {
       folder,
       resource_type: "auto",
     });
+
+    console.log("✅ Archivo subido:", result.secure_url);
 
     return {
       url: result.secure_url,
       publicId: result.public_id,
     };
   } catch (error) {
-    throw new Error(`Error al subir archivo a Cloudinary: ${error.message}`);
+    const errorMessage =
+      error instanceof Error ? error.message : "Error desconocido";
+    const errorStack = error instanceof Error ? error.stack : "";
+
+    console.error("❌ Error subiendo archivo a Cloudinary:", {
+      message: errorMessage,
+      stack: errorStack,
+      file: file?.name,
+    });
+
+    throw new Error(`Error al subir archivo: ${errorMessage}`);
   }
 };
 
 export const deleteFile = async (publicId: string): Promise<void> => {
   try {
     await cloudinary.v2.uploader.destroy(publicId);
+    console.log("🗑️ Archivo eliminado:", publicId);
   } catch (error) {
-    console.error("Error eliminando archivo de Cloudinary:", error);
-  }
-};
-
-export const updateFile = async (
-  file: UploadedFile,
-  publicId: string,
-  folder = "uploads",
-): Promise<{ url: string; publicId: string }> => {
-  try {
-    // Eliminar archivo anterior
-    await cloudinary.v2.uploader.destroy(publicId);
-
-    // Subir archivo nuevo
-    const result = await cloudinary.v2.uploader.upload(file.tempFilePath, {
-      folder,
-      resource_type: "auto",
-    });
-
-    return {
-      url: result.secure_url,
-      publicId: result.public_id,
-    };
-  } catch (error) {
-    throw new Error("Error al actualizar archivo en Cloudinary");
+    const errorMessage =
+      error instanceof Error ? error.message : "Error desconocido";
+    console.error("Error eliminando archivo:", errorMessage);
   }
 };
