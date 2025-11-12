@@ -130,4 +130,3 @@ Se recomienda usar Postman con la colección preparada para subir registros con 
 
 ***
 
-Si tienes más dudas o quieres ejemplos específicos, dime y te ayudo. ¡Éxitos con tu proyecto! 🚀
