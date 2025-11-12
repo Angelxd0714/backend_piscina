@@ -1,7 +1,7 @@
 import { Schema, model, Document } from "mongoose";
 
 export enum Categoria {
-  NINOS = "Ninios",
+  NINOS = "Niños",
   ADULTOS = "Adultos",
 }
 export enum Forma {
