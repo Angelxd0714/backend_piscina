@@ -1,37 +1,51 @@
 import { Request, Response, NextFunction } from "express";
-import { IUser, User } from "../models/User";
-import { errorResponse, successResponse } from "../utils/responses";
+import { User } from "../models/User";
 import jwt from "jsonwebtoken";
-export interface AuthRequest extends Request {
-  user?: IUser;
-}
+
 export const protect = async (
-  req: AuthRequest,
+  req: Request,
   res: Response,
   next: NextFunction,
-) => {
-  const token = req.headers.authorization?.split(" ")[1];
-
-  if (!token) {
-    return errorResponse(res, "Unauthorized");
-  }
-
+): Promise<void> => {
   try {
+    const token = req.headers.authorization?.split(" ")[1];
+
+    if (!token) {
+      res.status(401).json({
+        success: false,
+        message: "No autorizado, token no proporcionado",
+      });
+      return;
+    }
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
       id: string;
     };
+
     const user = await User.findById(decoded.id).select("+password");
+
     if (!user) {
-      return errorResponse(res, "User not found");
+      res.status(404).json({
+        success: false,
+        message: "Usuario no encontrado",
+      });
+      return;
     }
-    req.user = user;
-    next();
-    if (user.estado === "inactivo") {
-      return errorResponse(res, "Forbidden");
+
+    if (user.estado === "INACTIVO") {
+      res.status(403).json({
+        success: false,
+        message: "Usuario inactivo, no puede acceder",
+      });
+      return;
     }
-    req.user = user;
+
+    (req as any).user = user;
     next();
   } catch (error) {
-    return errorResponse(res, "Unauthorized");
+    res.status(401).json({
+      success: false,
+      message: "Token inválido o expirado",
+    });
+    return;
   }
 };

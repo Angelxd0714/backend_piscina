@@ -22,7 +22,7 @@ export interface IBomba {
   fotoBomba: string;
   potencia: number;
   material: MaterialBomba;
-  seRepite: boolean;
+  seRepite: "si" | "no";
   totalBombas?: number;
   hojaSeguridad: string;
   fichaTecnica: string;
@@ -73,9 +73,10 @@ const bombaSchema = new Schema<IBomba>(
       required: [true, "El material de la bomba es requerido"],
     },
     seRepite: {
-      type: Boolean,
+      type: String,
+      enum: ["si", "no"],
       required: true,
-      default: false,
+      default: "no",
     },
     totalBombas: {
       type: Number,

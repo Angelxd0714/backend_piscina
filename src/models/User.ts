@@ -1,12 +1,12 @@
 import { Schema, model, Document } from "mongoose";
 import bcrypt from "bcryptjs";
 export enum UserRoles {
-  ADMIN = "admin",
-  USER = "user",
+  ADMIN = "ADMIN",
+  USER = "USER",
 }
 export enum UserStatus {
-  ACTIVO = "activo",
-  INACTIVO = "inactivo",
+  ACTIVO = "ACTIVO",
+  INACTIVO = "INACTIVO",
 }
 export interface IUser extends Document {
   _id: any;
@@ -25,7 +25,7 @@ export interface IUser extends Document {
 const userSchema = new Schema(
   {
     nombre: { type: String, required: true },
-    apellido: { type: String, required: true },
+    apellido: { type: String, required: false },
     identificacion: { type: String, required: true },
     correo: {
       type: String,

@@ -1,55 +1,155 @@
-import multer from "multer";
-import path from "path";
-import { Request } from "express";
-const storage = multer.diskStorage({
-  destination: (
-    req: Request,
-    file: Express.Multer.File,
-    cb: (error: Error | null, destination: string) => void,
-  ) => {
-    cb(null, path.join(__dirname, "..", "..", "uploads"));
-  },
-  filename: (
-    req: Request,
-    file: Express.Multer.File,
-    cb: (error: Error | null, filename: string) => void,
-  ) => {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(
-      null,
-      file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname),
-    );
-  },
-});
+import { Request, Response, NextFunction } from "express";
+import { UploadedFile } from "express-fileupload";
+import { errorResponse } from "../utils/responses";
 
-const fileFilter = (
+export const validatePiscinaFiles = (
   req: Request,
-  file: Express.Multer.File,
-  cb: multer.FileFilterCallback,
-) => {
-  if (file.fieldname === "foto" || file.fieldname === "fotoBomba") {
-    if (
-      file.mimetype === "image/png" ||
-      file.mimetype === "image/jpeg" ||
-      file.mimetype === "image/jpg"
-    ) {
-      cb(null, true);
-    } else {
-      cb(new Error("Only image files are allowed"));
+  res: Response,
+  next: NextFunction,
+): void => {
+  try {
+    if (!req.files) {
+      errorResponse(res, "Archivos requeridos no proporcionados", 400);
+      return;
     }
-  } else if (
-    file.fieldname === "hojaSeguridad" ||
-    file.fieldname === "fichaTecnica"
-  ) {
-    if (file.mimetype === "application/pdf") {
-      cb(null, true);
-    } else {
-      cb(new Error("Only PDF files are allowed"));
+
+    const files = req.files;
+
+    const foto = files.foto as UploadedFile | undefined;
+    if (!foto) {
+      errorResponse(res, "La foto de la piscina es requerida", 400);
+      return;
     }
+
+    const validImageFormats = ["image/png", "image/jpeg"];
+    if (!validImageFormats.includes(foto.mimetype)) {
+      errorResponse(res, "La foto debe ser PNG o JPEG", 400);
+      return;
+    }
+
+    const bombasData = JSON.parse(req.body.bombas || "[]");
+
+    for (let i = 0; i < bombasData.length; i++) {
+      const fotoBomba = files[`fotoBomba_${i}`] as UploadedFile | undefined;
+      const hojaSeguridad = files[`hojaSeguridad_${i}`] as
+        | UploadedFile
+        | undefined;
+      const fichaTecnica = files[`fichaTecnica_${i}`] as
+        | UploadedFile
+        | undefined;
+
+      if (!fotoBomba) {
+        errorResponse(res, `Foto de la bomba ${i + 1} es requerida`, 400);
+        return;
+      }
+      if (!hojaSeguridad) {
+        errorResponse(
+          res,
+          `Hoja de seguridad de la bomba ${i + 1} es requerida`,
+          400,
+        );
+        return;
+      }
+      if (!fichaTecnica) {
+        errorResponse(
+          res,
+          `Ficha técnica de la bomba ${i + 1} es requerida`,
+          400,
+        );
+        return;
+      }
+      if (!validImageFormats.includes(fotoBomba.mimetype)) {
+        errorResponse(
+          res,
+          `La foto de la bomba ${i + 1} debe ser PNG o JPEG`,
+          400,
+        );
+        return;
+      }
+      if (hojaSeguridad.mimetype !== "application/pdf") {
+        errorResponse(
+          res,
+          `La hoja de seguridad de la bomba ${i + 1} debe ser PDF`,
+          400,
+        );
+        return;
+      }
+      if (fichaTecnica.mimetype !== "application/pdf") {
+        errorResponse(
+          res,
+          `La ficha técnica de la bomba ${i + 1} debe ser PDF`,
+          400,
+        );
+        return;
+      }
+    }
+
+    next();
+  } catch (error: any) {
+    errorResponse(res, error.message, 400);
   }
 };
-export const upload = multer({
-  storage,
-  fileFilter,
-  limits: { fileSize: 1024 * 1024 * 5 }, // 5mb
-});
+
+export const validateUpdatePiscinaFiles = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): void => {
+  try {
+    if (!req.files) {
+      next();
+      return;
+    }
+
+    const files = req.files;
+    const validImageFormats = ["image/png", "image/jpeg"];
+
+    const foto = files.foto as UploadedFile | undefined;
+    if (foto && !validImageFormats.includes(foto.mimetype)) {
+      errorResponse(res, "La foto debe ser PNG o JPEG", 400);
+      return;
+    }
+    if (req.body.bombas) {
+      const bombasData = JSON.parse(req.body.bombas);
+
+      for (let i = 0; i < bombasData.length; i++) {
+        const fotoBomba = files[`fotoBomba_${i}`] as UploadedFile | undefined;
+        const hojaSeguridad = files[`hojaSeguridad_${i}`] as
+          | UploadedFile
+          | undefined;
+        const fichaTecnica = files[`fichaTecnica_${i}`] as
+          | UploadedFile
+          | undefined;
+
+        if (fotoBomba && !validImageFormats.includes(fotoBomba.mimetype)) {
+          errorResponse(
+            res,
+            `La foto de la bomba ${i + 1} debe ser PNG o JPEG`,
+            400,
+          );
+          return;
+        }
+        if (hojaSeguridad && hojaSeguridad.mimetype !== "application/pdf") {
+          errorResponse(
+            res,
+            `La hoja de seguridad de la bomba ${i + 1} debe ser PDF`,
+            400,
+          );
+          return;
+        }
+        if (fichaTecnica && fichaTecnica.mimetype !== "application/pdf") {
+          errorResponse(
+            res,
+            `La ficha técnica de la bomba ${i + 1} debe ser PDF`,
+            400,
+          );
+          return;
+        }
+      }
+    }
+
+    next();
+  } catch (error: any) {
+    errorResponse(res, error.message, 400);
+  }
+};

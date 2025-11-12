@@ -3,7 +3,9 @@ import mongoose from "mongoose";
 export const connectDB = async (): Promise<void> => {
   try {
     const mongoUri =
-      process.env.MONGODB_URI || "mongodb://localhost:27017/piscinas";
+      process.env.MONGODB_URI ||
+      process.env.MONGO_ATLAS ||
+      "mongodb://localhost:27017/piscinas";
 
     await mongoose.connect(mongoUri);
 

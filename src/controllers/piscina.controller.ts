@@ -1,4 +1,3 @@
-// src/controllers/piscina.controller.ts
 import { Request, Response } from "express";
 import Piscina from "../models/Piscina";
 import { IBomba } from "../models/Piscina";
@@ -25,12 +24,10 @@ export const createPiscina = async (
 
     const files = req.files;
 
-    // Subir foto de la piscina
     const fotoPiscina = files.foto as UploadedFile;
     const fotoResult = await uploadFile(fotoPiscina, "piscinas/fotos");
     req.body.foto = fotoResult.url;
-
-    const bombas = JSON.parse(req.body.bombas || "[]");
+    const bombas = req.body.bombas || [];
 
     const bombasConArchivos: IBomba[] = [];
 
@@ -40,6 +37,11 @@ export const createPiscina = async (
       const fotoBomba = files[`fotoBomba_${i}`] as UploadedFile;
       const hojaSeguridad = files[`hojaSeguridad_${i}`] as UploadedFile;
       const fichaTecnica = files[`fichaTecnica_${i}`] as UploadedFile;
+
+      if (!fotoBomba || !hojaSeguridad || !fichaTecnica) {
+        errorResponse(res, `Archivos faltantes para la bomba ${i}`, 400);
+        return;
+      }
 
       const fotoBombaResult = await uploadFile(
         fotoBomba,
@@ -62,19 +64,13 @@ export const createPiscina = async (
       });
     }
 
-    // Reemplazar bombas en el body
     req.body.bombas = bombasConArchivos;
-
-    // Parsear profundidades si viene como string
-    if (typeof req.body.profundidades === "string") {
-      req.body.profundidades = JSON.parse(req.body.profundidades);
-    }
-
     const piscinaData = req.body;
     const piscina = await Piscina.create(piscinaData);
 
     successResponse(res, piscina, "Piscina creada exitosamente", 201);
   } catch (error: any) {
+    console.error("Error en createPiscina:", error); // ✅ Agregar log
     errorResponse(res, error.message);
   }
 };

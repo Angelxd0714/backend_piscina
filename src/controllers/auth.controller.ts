@@ -3,8 +3,11 @@ import jwt from "jsonwebtoken";
 import { User } from "../models/User";
 import { successResponse, errorResponse } from "../utils/responses";
 import { validationResult } from "express-validator";
+import dotenv from "dotenv";
 
+dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET;
+console.log(JWT_SECRET);
 const JWT_EXPIRES_IN = Number(process.env.JWT_EXPIRES_IN) || 3600;
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {

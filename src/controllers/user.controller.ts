@@ -1,23 +1,24 @@
-import { Response } from "express";
+import { Request, Response } from "express";
 import { User, UserStatus } from "../models/User";
-import { AuthRequest } from "../middlewares/auth.middleware";
 import { successResponse, errorResponse } from "../utils/responses";
 import { validationResult } from "express-validator";
 
 export const getAllUsers = async (
-  req: AuthRequest,
+  req: Request,
   res: Response,
 ): Promise<void> => {
   try {
     const users = await User.find().select("-password");
     successResponse(res, users);
+    return;
   } catch (error: any) {
     errorResponse(res, error.message);
+    return;
   }
 };
 
 export const getUserById = async (
-  req: AuthRequest,
+  req: Request,
   res: Response,
 ): Promise<void> => {
   try {
@@ -29,13 +30,15 @@ export const getUserById = async (
     }
 
     successResponse(res, user);
+    return;
   } catch (error: any) {
     errorResponse(res, error.message);
+    return;
   }
 };
 
 export const updateUser = async (
-  req: AuthRequest,
+  req: Request,
   res: Response,
 ): Promise<void> => {
   try {
@@ -58,13 +61,15 @@ export const updateUser = async (
     }
 
     successResponse(res, user, "Usuario actualizado exitosamente");
+    return;
   } catch (error: any) {
     errorResponse(res, error.message);
+    return;
   }
 };
 
 export const deleteUser = async (
-  req: AuthRequest,
+  req: Request,
   res: Response,
 ): Promise<void> => {
   try {
@@ -76,13 +81,15 @@ export const deleteUser = async (
     }
 
     successResponse(res, null, "Usuario eliminado exitosamente");
+    return;
   } catch (error: any) {
     errorResponse(res, error.message);
+    return;
   }
 };
 
 export const toggleUserState = async (
-  req: AuthRequest,
+  req: Request,
   res: Response,
 ): Promise<void> => {
   try {
@@ -104,7 +111,9 @@ export const toggleUserState = async (
       { estado: user.estado },
       `Usuario ${user.estado === UserStatus.ACTIVO ? "activado" : "inactivado"} exitosamente`,
     );
+    return;
   } catch (error: any) {
     errorResponse(res, error.message);
+    return;
   }
 };
