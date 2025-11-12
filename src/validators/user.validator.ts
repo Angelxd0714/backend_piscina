@@ -62,7 +62,7 @@ export const updateUserValidator = [
 
   body("estado")
     .optional()
-    .isIn(["activo", "inactivo"])
+    .isIn(["ACTIVO", "INACTIVO"])
     .withMessage("Estado inválido"),
 
   body("rol")
