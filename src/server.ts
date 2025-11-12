@@ -44,7 +44,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// PASO 4: RUTAS - AQUÍ ES CRÍTICO
 console.log("✅ Registrando rutas...");
 app.use("/api/auth", authRoutes);
 console.log("   ✓ /api/auth registrado");
@@ -67,7 +66,6 @@ app.get("/", (req: Request, res: Response) => {
   });
 });
 
-// PASO 6: 404 handler - AL FINAL
 app.use((req: Request, res: Response) => {
   console.log(`❌ 404: ${req.method} ${req.path}`);
   res.status(404).json({

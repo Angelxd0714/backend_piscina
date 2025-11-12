@@ -23,7 +23,7 @@ const options: swaggerJsdoc.Options = {
         description: "Servidor de desarrollo",
       },
       {
-        url: "https://api-piscinas.herokuapp.com",
+        url: "https://backend-piscina.onrender.com",
         description: "Servidor de producción (ejemplo)",
       },
     ],
