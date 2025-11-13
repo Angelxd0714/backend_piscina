@@ -19,13 +19,13 @@ export enum MaterialBomba {
 export interface IBomba {
   marca: string;
   referencia: string;
-  fotoBomba: string;
+  fotoBomba?: string;
   potencia: number;
   material: MaterialBomba;
   seRepite: "si" | "no";
   totalBombas?: number;
-  hojaSeguridad: string;
-  fichaTecnica: string;
+  hojaSeguridad?: string;
+  fichaTecnica?: string;
 }
 export interface IPiscina extends Document {
   nombre: string;
@@ -60,7 +60,7 @@ const bombaSchema = new Schema<IBomba>(
     },
     fotoBomba: {
       type: String,
-      required: [true, "La foto de la bomba es requerida"],
+      required: false,
     },
     potencia: {
       type: Number,
@@ -83,7 +83,7 @@ const bombaSchema = new Schema<IBomba>(
       min: [1, "El total de bombas debe ser al menos 1"],
       validate: {
         validator: function (this: IBomba, value: number) {
-          if (this.seRepite && !value) {
+          if (this.seRepite === "si" && !value) {
             return false;
           }
           return true;
@@ -93,11 +93,11 @@ const bombaSchema = new Schema<IBomba>(
     },
     hojaSeguridad: {
       type: String,
-      required: [true, "La hoja de seguridad es requerida"],
+      required: false,
     },
     fichaTecnica: {
       type: String,
-      required: [true, "La ficha técnica es requerida"],
+      required: false,
     },
   },
   { _id: false },
