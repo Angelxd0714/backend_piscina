@@ -17,12 +17,10 @@ export const createPiscina = async (
       return;
     }
 
-    // ✅ Parsear profundidades si viene como string
     if (typeof req.body.profundidades === "string") {
       req.body.profundidades = JSON.parse(req.body.profundidades);
     }
 
-    // ✅ Parsear bombas si viene como string
     let bombas = [];
     if (typeof req.body.bombas === "string") {
       bombas = JSON.parse(req.body.bombas);
@@ -37,11 +35,9 @@ export const createPiscina = async (
 
     const files = req.files;
 
-    // Subir foto principal
     const fotoPiscina = files.foto as UploadedFile;
     const fotoResult = await uploadFile(fotoPiscina, "piscinas/fotos");
 
-    // Procesar bombas con archivos
     const bombasConArchivos: IBomba[] = [];
 
     for (let i = 0; i < bombas.length; i++) {
@@ -147,19 +143,30 @@ export const updatePiscina = async (
       return;
     }
 
+    if (typeof req.body.profundidades === "string") {
+      req.body.profundidades = JSON.parse(req.body.profundidades);
+    }
+
+    let bombas = [];
+    if (typeof req.body.bombas === "string") {
+      bombas = JSON.parse(req.body.bombas);
+    } else {
+      bombas = req.body.bombas || [];
+    }
+
+    let fotoUrl = piscinaExistente.foto;
+    let bombasConArchivos: IBomba[] = [];
+
     if (req.files) {
       const files = req.files;
 
       const foto = files.foto as UploadedFile | undefined;
       if (foto) {
         const fotoResult = await uploadFile(foto, "piscinas/fotos");
-        req.body.foto = fotoResult.url;
+        fotoUrl = fotoResult.url;
       }
 
-      if (req.body.bombas) {
-        const bombas = JSON.parse(req.body.bombas);
-        const bombasConArchivos: IBomba[] = [];
-
+      if (bombas.length > 0) {
         for (let i = 0; i < bombas.length; i++) {
           const bomba = bombas[i];
 
@@ -170,6 +177,7 @@ export const updatePiscina = async (
           const fichaTecnica = files[`fichaTecnica_${i}`] as
             | UploadedFile
             | undefined;
+
           const fotoBombaUrl = fotoBomba
             ? (await uploadFile(fotoBomba, "piscinas/bombas/fotos")).url
             : bomba.fotoBomba || piscinaExistente.bombas[i]?.fotoBomba;
@@ -189,22 +197,43 @@ export const updatePiscina = async (
             fichaTecnica: fichaUrl,
           });
         }
-
-        req.body.bombas = bombasConArchivos;
+      } else {
+        bombasConArchivos = piscinaExistente.bombas;
       }
+    } else {
+      bombasConArchivos = bombas.length > 0 ? bombas : piscinaExistente.bombas;
     }
 
-    if (typeof req.body.profundidades === "string") {
-      req.body.profundidades = JSON.parse(req.body.profundidades);
-    }
+    const updateData = {
+      nombre: req.body.nombre || piscinaExistente.nombre,
+      direccion: req.body.direccion || piscinaExistente.direccion,
+      altura: req.body.altura || piscinaExistente.altura,
+      ancho: req.body.ancho || piscinaExistente.ancho,
+      ciudad: req.body.ciudad || piscinaExistente.ciudad,
+      municipio: req.body.municipio || piscinaExistente.municipio,
+      temperaturaExterna:
+        req.body.temperaturaExterna !== undefined
+          ? req.body.temperaturaExterna
+          : piscinaExistente.temperaturaExterna,
+      categoria: req.body.categoria || piscinaExistente.categoria,
+      totalProfundidades:
+        req.body.totalProfundidades || piscinaExistente.totalProfundidades,
+      profundidades: req.body.profundidades || piscinaExistente.profundidades,
+      forma: req.body.forma || piscinaExistente.forma,
+      uso: req.body.uso || piscinaExistente.uso,
+      filtros: req.body.filtros || piscinaExistente.filtros,
+      foto: fotoUrl,
+      bombas: bombasConArchivos,
+    };
 
-    const piscina = await Piscina.findByIdAndUpdate(req.params.id, req.body, {
+    const piscina = await Piscina.findByIdAndUpdate(req.params.id, updateData, {
       new: true,
       runValidators: true,
     });
 
     successResponse(res, piscina, "Piscina actualizada exitosamente");
   } catch (error: any) {
+    console.error("Error en updatePiscina:", error);
     errorResponse(res, error.message);
   }
 };
