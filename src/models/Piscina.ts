@@ -152,23 +152,6 @@ const piscinaSchema = new Schema<IPiscina>(
     profundidades: {
       type: [Number],
       required: [true, "Las profundidades son requeridas"],
-      validate: {
-        validator: function (this: IPiscina, value: number[]) {
-          if (value.length !== this.totalProfundidades) {
-            return false;
-          }
-
-          for (let i = 1; i < value.length; i++) {
-            if (value[i] <= value[i - 1]) {
-              return false;
-            }
-          }
-
-          return true;
-        },
-        message:
-          "Las profundidades deben estar en orden ascendente y coincidir con el total",
-      },
     },
     forma: {
       type: String,
