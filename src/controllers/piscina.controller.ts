@@ -17,12 +17,17 @@ export const createPiscina = async (
       return;
     }
 
+    // ✅ Parsear profundidades si viene como string
     if (typeof req.body.profundidades === "string") {
       req.body.profundidades = JSON.parse(req.body.profundidades);
     }
 
+    // ✅ Parsear bombas si viene como string
+    let bombas = [];
     if (typeof req.body.bombas === "string") {
-      req.body.bombas = JSON.parse(req.body.bombas);
+      bombas = JSON.parse(req.body.bombas);
+    } else {
+      bombas = req.body.bombas || [];
     }
 
     if (!req.files) {
@@ -32,12 +37,11 @@ export const createPiscina = async (
 
     const files = req.files;
 
+    // Subir foto principal
     const fotoPiscina = files.foto as UploadedFile;
     const fotoResult = await uploadFile(fotoPiscina, "piscinas/fotos");
-    req.body.foto = fotoResult.url;
 
-    const bombas = req.body.bombas || [];
-
+    // Procesar bombas con archivos
     const bombasConArchivos: IBomba[] = [];
 
     for (let i = 0; i < bombas.length; i++) {
@@ -73,8 +77,25 @@ export const createPiscina = async (
       });
     }
 
-    req.body.bombas = bombasConArchivos;
-    const piscinaData = req.body;
+    // ✅ Construir el objeto piscinaData de forma explícita
+    const piscinaData = {
+      nombre: req.body.nombre,
+      direccion: req.body.direccion,
+      altura: req.body.altura,
+      ancho: req.body.ancho,
+      ciudad: req.body.ciudad,
+      municipio: req.body.municipio,
+      temperaturaExterna: req.body.temperaturaExterna,
+      categoria: req.body.categoria,
+      totalProfundidades: req.body.totalProfundidades,
+      profundidades: req.body.profundidades, // Ya parseado
+      forma: req.body.forma,
+      uso: req.body.uso,
+      filtros: req.body.filtros,
+      foto: fotoResult.url,
+      bombas: bombasConArchivos, // Array de objetos procesado
+    };
+
     const piscina = await Piscina.create(piscinaData);
 
     successResponse(res, piscina, "Piscina creada exitosamente", 201);

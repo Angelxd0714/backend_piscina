@@ -24,6 +24,8 @@ export const parseFormData = (
     if (req.body.bombas) {
       if (typeof req.body.bombas === "string") {
         req.body.bombas = JSON.parse(req.body.bombas);
+      } else {
+        req.body.bombas = req.body.bombas || [];
       }
     }
     if (req.body.totalProfundidades) {
