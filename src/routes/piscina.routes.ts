@@ -176,7 +176,7 @@ router.post(
   "/",
   authorize(UserRoles.ADMIN),
   parseFormData,
-  // validatePiscinaFiles,
+  validatePiscinaFiles,
   createPiscinaValidator,
   createPiscina,
 );
@@ -268,6 +268,7 @@ router.post(
 router.put(
   "/:id",
   authorize(UserRoles.ADMIN),
+  parseFormData,
   validateUpdatePiscinaFiles,
   updatePiscina,
 );
