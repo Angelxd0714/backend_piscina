@@ -17,6 +17,14 @@ export const createPiscina = async (
       return;
     }
 
+    if (typeof req.body.profundidades === "string") {
+      req.body.profundidades = JSON.parse(req.body.profundidades);
+    }
+
+    if (typeof req.body.bombas === "string") {
+      req.body.bombas = JSON.parse(req.body.bombas);
+    }
+
     if (!req.files) {
       errorResponse(res, "Archivos requeridos", 400);
       return;
@@ -27,6 +35,7 @@ export const createPiscina = async (
     const fotoPiscina = files.foto as UploadedFile;
     const fotoResult = await uploadFile(fotoPiscina, "piscinas/fotos");
     req.body.foto = fotoResult.url;
+
     const bombas = req.body.bombas || [];
 
     const bombasConArchivos: IBomba[] = [];
@@ -70,7 +79,7 @@ export const createPiscina = async (
 
     successResponse(res, piscina, "Piscina creada exitosamente", 201);
   } catch (error: any) {
-    console.error("Error en createPiscina:", error); // ✅ Agregar log
+    console.error("Error en createPiscina:", error);
     errorResponse(res, error.message);
   }
 };
