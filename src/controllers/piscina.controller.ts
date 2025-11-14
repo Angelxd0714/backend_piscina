@@ -16,11 +16,31 @@ export const createPiscina = async (
       errorResponse(res, "Errores de validación", 400, errors.array());
       return;
     }
-    console.log("✅ Validación pasada");
-    console.log("req.body.profundidades ANTES:", {
-      type: typeof req.body.profundidades,
-      value: req.body.profundidades,
-    });
+    //  PARSEA PROFUNDIDADES SI ES STRING
+    if (typeof req.body.profundidades === "string") {
+      try {
+        req.body.profundidades = JSON.parse(req.body.profundidades);
+        console.log("Profundidades parseadas:", req.body.profundidades);
+      } catch (e) {
+        req.body.profundidades = req.body.profundidades
+          .split(",")
+          .map((p: string) => parseFloat(p.trim()))
+          .filter((p: number) => !isNaN(p));
+      }
+    }
+
+    //  CONVIERTE A NÚMEROS
+    if (Array.isArray(req.body.profundidades)) {
+      req.body.profundidades = req.body.profundidades
+        .map((p: any) => {
+          const num = parseFloat(p);
+          return isNaN(num) ? null : num;
+        })
+        .filter((p: number | null) => p !== null);
+    }
+
+    console.log("📊 Profundidades final:", req.body.profundidades);
+
     let bombas = [];
     if (typeof req.body.bombas === "string") {
       bombas = JSON.parse(req.body.bombas);
