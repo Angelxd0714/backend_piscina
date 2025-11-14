@@ -193,6 +193,27 @@ export const updatePiscina = async (
     if (typeof req.body.profundidades === "string") {
       req.body.profundidades = JSON.parse(req.body.profundidades);
     }
+    if (typeof req.body.profundidades === "string") {
+      try {
+        req.body.profundidades = JSON.parse(req.body.profundidades);
+        console.log("Profundidades parseadas:", req.body.profundidades);
+      } catch (e) {
+        req.body.profundidades = req.body.profundidades
+          .split(",")
+          .map((p: string) => parseFloat(p.trim()))
+          .filter((p: number) => !isNaN(p));
+      }
+    }
+
+    //  CONVIERTE A NÚMEROS
+    if (Array.isArray(req.body.profundidades)) {
+      req.body.profundidades = req.body.profundidades
+        .map((p: any) => {
+          const num = parseFloat(p);
+          return isNaN(num) ? null : num;
+        })
+        .filter((p: number | null) => p !== null);
+    }
 
     // Parse bombas
     let bombas = [];
