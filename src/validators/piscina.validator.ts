@@ -61,7 +61,7 @@ export const createPiscinaValidator = [
       throw new Error("Debe proporcionar al menos 1 profundidad");
     }
 
-    if (parsed.length !== req.body.totalProfundidades) {
+    if (parsed.length != req.body.totalProfundidades) {
       throw new Error("La cantidad de profundidades no coincide con el total");
     }
 
@@ -122,7 +122,7 @@ export const createPiscinaValidator = [
           `El material de la bomba ${index} debe ser "Sumergible" o "Centrifuga"`,
         );
       }
-      if (bomba.seRepite === "si" && !bomba.totalBombas) {
+      if (bomba.totalBombas == req.body.bombas[index].totalBombas) {
         throw new Error(
           `La bomba ${index} requiere el campo totalBombas cuando seRepite es "si"`,
         );
