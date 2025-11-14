@@ -17,17 +17,20 @@ export const createPiscina = async (
       return;
     }
 
+    // Parse profundidades
     if (typeof req.body.profundidades === "string") {
       req.body.profundidades = JSON.parse(req.body.profundidades);
     }
 
+    // Parse bombas
     let bombas = [];
     if (typeof req.body.bombas === "string") {
       bombas = JSON.parse(req.body.bombas);
     } else {
-      bombas = req.body.bombas || [];
+      bombas = Array.isArray(req.body.bombas) ? req.body.bombas : [];
     }
 
+    // Validar archivos
     if (!req.files) {
       errorResponse(res, "Archivos requeridos", 400);
       return;
@@ -35,20 +38,53 @@ export const createPiscina = async (
 
     const files = req.files;
 
+    // Upload foto piscina
     const fotoPiscina = files.foto as UploadedFile;
+    if (!fotoPiscina) {
+      errorResponse(res, "Foto de piscina requerida", 400);
+      return;
+    }
+
     const fotoResult = await uploadFile(fotoPiscina, "piscinas/fotos");
 
+    // Procesar bombas con archivos
     const bombasConArchivos: IBomba[] = [];
 
     for (let i = 0; i < bombas.length; i++) {
       const bomba = bombas[i];
 
-      const fotoBomba = files[`fotoBomba_${i}`] as UploadedFile;
-      const hojaSeguridad = files[`hojaSeguridad_${i}`] as UploadedFile;
-      const fichaTecnica = files[`fichaTecnica_${i}`] as UploadedFile;
+      const fotoBomba = files[`fotoBomba_${i}`] as UploadedFile | undefined;
+      const hojaSeguridad = files[`hojaSeguridad_${i}`] as
+        | UploadedFile
+        | undefined;
+      const fichaTecnica = files[`fichaTecnica_${i}`] as
+        | UploadedFile
+        | undefined;
 
-      if (!fotoBomba || !hojaSeguridad || !fichaTecnica) {
-        errorResponse(res, `Archivos faltantes para la bomba ${i}`, 400);
+      if (!fotoBomba) {
+        errorResponse(
+          res,
+          `Foto de bomba requerida para la bomba ${i} (${bomba.marca || "sin marca"})`,
+          400,
+        );
+        return;
+      }
+
+      if (!hojaSeguridad) {
+        errorResponse(
+          res,
+          `Hoja de seguridad requerida para la bomba ${i} (${bomba.marca || "sin marca"})`,
+          400,
+        );
+        return;
+      }
+
+      if (!fichaTecnica) {
+        errorResponse(
+          res,
+          `Ficha técnica requerida para la bomba ${i} (${bomba.marca || "sin marca"})`,
+          400,
+        );
         return;
       }
 
@@ -73,7 +109,7 @@ export const createPiscina = async (
       });
     }
 
-    // ✅ Construir el objeto piscinaData de forma explícita
+    // Construir objeto piscinaData
     const piscinaData = {
       nombre: req.body.nombre,
       direccion: req.body.direccion,
@@ -84,19 +120,19 @@ export const createPiscina = async (
       temperaturaExterna: req.body.temperaturaExterna,
       categoria: req.body.categoria,
       totalProfundidades: req.body.totalProfundidades,
-      profundidades: req.body.profundidades, // Ya parseado
+      profundidades: req.body.profundidades,
       forma: req.body.forma,
       uso: req.body.uso,
       filtros: req.body.filtros,
       foto: fotoResult.url,
-      bombas: bombasConArchivos, // Array de objetos procesado
+      bombas: bombasConArchivos,
     };
 
     const piscina = await Piscina.create(piscinaData);
 
     successResponse(res, piscina, "Piscina creada exitosamente", 201);
   } catch (error: any) {
-    console.error("Error en createPiscina:", error);
+    console.error("❌ Error en createPiscina:", error);
     errorResponse(res, error.message);
   }
 };
@@ -144,15 +180,17 @@ export const updatePiscina = async (
       return;
     }
 
+    // Parse profundidades
     if (typeof req.body.profundidades === "string") {
       req.body.profundidades = JSON.parse(req.body.profundidades);
     }
 
+    // Parse bombas
     let bombas = [];
     if (typeof req.body.bombas === "string") {
       bombas = JSON.parse(req.body.bombas);
     } else {
-      bombas = req.body.bombas || [];
+      bombas = Array.isArray(req.body.bombas) ? req.body.bombas : [];
     }
 
     let fotoUrl = piscinaExistente.foto;
@@ -161,12 +199,14 @@ export const updatePiscina = async (
     if (req.files) {
       const files = req.files;
 
+      // Update foto piscina si se proporciona
       const foto = files.foto as UploadedFile | undefined;
       if (foto) {
         const fotoResult = await uploadFile(foto, "piscinas/fotos");
         fotoUrl = fotoResult.url;
       }
 
+      // Procesar bombas
       if (bombas.length > 0) {
         for (let i = 0; i < bombas.length; i++) {
           const bomba = bombas[i];
@@ -234,7 +274,7 @@ export const updatePiscina = async (
 
     successResponse(res, piscina, "Piscina actualizada exitosamente");
   } catch (error: any) {
-    console.error("Error en updatePiscina:", error);
+    console.error("❌ Error en updatePiscina:", error);
     errorResponse(res, error.message);
   }
 };
