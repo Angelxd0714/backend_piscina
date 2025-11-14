@@ -8,7 +8,7 @@ import {
 } from "../controllers/user.controller";
 import { protect } from "../middlewares/auth.middleware";
 import { authorize } from "../middlewares/role.middleware";
-import { UserRoles } from "../models/User";
+import { UserRoles } from "../models/dto/User.enum";
 import { updateUserValidator } from "../validators/user.validator";
 
 const router = Router();

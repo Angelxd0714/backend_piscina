@@ -1,13 +1,6 @@
 import { Schema, model, Document } from "mongoose";
 import bcrypt from "bcryptjs";
-export enum UserRoles {
-  ADMIN = "ADMIN",
-  USER = "USER",
-}
-export enum UserStatus {
-  ACTIVO = "ACTIVO",
-  INACTIVO = "INACTIVO",
-}
+import { UserRoles, UserStatus } from "./dto/User.enum";
 export interface IUser extends Document {
   _id: any;
   nombre: string;

@@ -1,5 +1,5 @@
 import { body } from "express-validator";
-import { UserRoles } from "../models/User";
+import { UserRoles } from "../models/dto/User.enum";
 export const registerUserValidator = [
   body("nombre").trim().notEmpty().withMessage("El nombre es requerido"),
 

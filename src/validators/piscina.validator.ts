@@ -1,5 +1,5 @@
 import { body } from "express-validator";
-import { Categoria, Forma, Tipo } from "../models/Piscina";
+import { Categoria, Forma, Tipo } from "../models/dto/Psicina.enum";
 
 export const createPiscinaValidator = [
   body("nombre").trim().notEmpty().withMessage("El nombre es requerido"),

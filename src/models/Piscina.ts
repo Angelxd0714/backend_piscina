@@ -1,21 +1,6 @@
 import { Schema, model, Document } from "mongoose";
+import { Categoria, Forma, Tipo, MaterialBomba } from "./dto/Psicina.enum";
 
-export enum Categoria {
-  NINOS = "Niños",
-  ADULTOS = "Adultos",
-}
-export enum Forma {
-  RECTANGULAR = "Rectangular",
-  CIRCULAR = "Circular",
-}
-export enum Tipo {
-  PUBLICA = "Publica",
-  PRIVADA = "Privada",
-}
-export enum MaterialBomba {
-  SUMERGIBLE = "Sumergible",
-  CENTRIFUGA = "Centrifuga",
-}
 export interface IBomba {
   marca: string;
   referencia: string;

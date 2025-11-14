@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
-import { User, UserStatus } from "../models/User";
+import { UserStatus } from "../models/dto/User.enum";
+import { User } from "../models/User";
 import { successResponse, errorResponse } from "../utils/responses";
 import { validationResult } from "express-validator";
 

@@ -1,7 +1,7 @@
 // src/middlewares/role.middleware.ts
 import { Request, Response, NextFunction } from "express";
 import { errorResponse } from "../utils/responses";
-import { UserRoles } from "../models/User";
+import { UserRoles } from "../models/dto/User.enum";
 
 export const authorize = (...roles: UserRoles[]) => {
   return (req: Request, res: Response, next: NextFunction): void => {

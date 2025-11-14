@@ -9,13 +9,12 @@ import {
 } from "../controllers/piscina.controller";
 import { protect } from "../middlewares/auth.middleware";
 import { authorize } from "../middlewares/role.middleware";
-import { UserRoles } from "../models/User";
+import { UserRoles } from "../models/dto/User.enum";
 import { createPiscinaValidator } from "../validators/piscina.validator";
 import {
   validatePiscinaFiles,
   validateUpdatePiscinaFiles,
 } from "../middlewares/upload.middleware";
-import { parseFormData } from "../middlewares/parseFormData.middleware";
 const router = Router();
 
 router.use(protect);
@@ -174,7 +173,7 @@ router.get("/:id", getPiscinaById);
  */
 router.post(
   "/",
-  // parseFormData,
+  authorize(UserRoles.ADMIN),
   validatePiscinaFiles,
   createPiscinaValidator,
   createPiscina,
@@ -267,7 +266,6 @@ router.post(
 router.put(
   "/:id",
   authorize(UserRoles.ADMIN),
-  parseFormData,
   validateUpdatePiscinaFiles,
   updatePiscina,
 );

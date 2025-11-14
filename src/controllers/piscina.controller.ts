@@ -189,14 +189,10 @@ export const updatePiscina = async (
       return;
     }
 
-    // Parse profundidades
-    if (typeof req.body.profundidades === "string") {
-      req.body.profundidades = JSON.parse(req.body.profundidades);
-    }
     if (typeof req.body.profundidades === "string") {
       try {
         req.body.profundidades = JSON.parse(req.body.profundidades);
-        console.log("Profundidades parseadas:", req.body.profundidades);
+        console.log("✅ Profundidades parseadas:", req.body.profundidades);
       } catch (e) {
         req.body.profundidades = req.body.profundidades
           .split(",")
@@ -205,7 +201,6 @@ export const updatePiscina = async (
       }
     }
 
-    //  CONVIERTE A NÚMEROS
     if (Array.isArray(req.body.profundidades)) {
       req.body.profundidades = req.body.profundidades
         .map((p: any) => {
@@ -215,7 +210,6 @@ export const updatePiscina = async (
         .filter((p: number | null) => p !== null);
     }
 
-    // Parse bombas
     let bombas = [];
     if (typeof req.body.bombas === "string") {
       bombas = JSON.parse(req.body.bombas);
@@ -229,14 +223,12 @@ export const updatePiscina = async (
     if (req.files) {
       const files = req.files;
 
-      // Update foto piscina si se proporciona
       const foto = files.foto as UploadedFile | undefined;
       if (foto) {
         const fotoResult = await uploadFile(foto, "piscinas/fotos");
         fotoUrl = fotoResult.url;
       }
 
-      // Procesar bombas
       if (bombas.length > 0) {
         for (let i = 0; i < bombas.length; i++) {
           const bomba = bombas[i];
@@ -296,6 +288,8 @@ export const updatePiscina = async (
       foto: fotoUrl,
       bombas: bombasConArchivos,
     };
+
+    console.log("📤 updateData.profundidades:", updateData.profundidades);
 
     const piscina = await Piscina.findByIdAndUpdate(req.params.id, updateData, {
       new: true,
