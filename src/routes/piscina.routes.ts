@@ -174,7 +174,7 @@ router.get("/:id", getPiscinaById);
  */
 router.post(
   "/",
-  parseFormData,
+  // parseFormData,
   validatePiscinaFiles,
   createPiscinaValidator,
   createPiscina,
