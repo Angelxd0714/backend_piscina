@@ -2,8 +2,7 @@ import mongoose from "mongoose";
 
 export const connectDB = async (): Promise<void> => {
   try {
-    const mongoUri =
-      "mongodb://mongo:mongo@127.0.0.1:27018/piscinas?authSource=admin";
+    const mongoUri = process.env.MONGO_ATLAS || process.env.MONGO_URI || "";
 
     await mongoose.connect(mongoUri);
 
