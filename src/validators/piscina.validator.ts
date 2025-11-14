@@ -52,7 +52,7 @@ export const createPiscinaValidator = [
       throw new Error("Debe proporcionar al menos 1 profundidad");
     }
 
-    if (parsed.length !== req.body.totalProfundidades) {
+    if (parsed.length != req.body.totalProfundidades) {
       throw new Error("La cantidad de profundidades no coincide con el total");
     }
 
