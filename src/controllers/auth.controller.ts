@@ -174,7 +174,7 @@ export const requestPasswordReset = async (
     });
 
     await transporter.sendMail({
-      from: process.env.EMAIL_USER,
+      from: process.env.EMAIL,
       to: correo,
       subject: "Recuperar contraseña",
       html: `
