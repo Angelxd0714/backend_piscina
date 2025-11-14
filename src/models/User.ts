@@ -30,6 +30,8 @@ const userSchema = new Schema(
       enum: Object.values(UserStatus),
       default: UserStatus.ACTIVO,
     },
+    resetToken: { type: String, required: false, default: null },
+    resetTokenExpiry: { type: Date, required: false, default: null },
     updatedAt: { type: Date, default: Date.now },
     createdAt: { type: Date, default: Date.now },
   },

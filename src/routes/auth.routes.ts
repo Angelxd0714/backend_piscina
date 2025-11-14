@@ -1,5 +1,11 @@
 import { Router } from "express";
-import { register, login } from "../controllers/auth.controller";
+import {
+  register,
+  login,
+  logout,
+  requestPasswordReset,
+  resetPassword,
+} from "../controllers/auth.controller";
 import {
   registerUserValidator,
   loginValidator,
@@ -69,5 +75,66 @@ router.post("/register", registerUserValidator, register);
  *         description: Login exitoso
  */
 router.post("/login", loginValidator, login);
+
+/**
+ * @swagger
+ * /api/auth/logout:
+ *   post:
+ *     summary: Cerrar sesión
+ *     tags: [Auth]
+ *     responses:
+ *       200:
+ *         description: Sesión cerrada exitosamente
+ */
+router.post("/logout", logout);
+
+/**
+ * @swagger
+ * /api/auth/request-password-reset:
+ *   post:
+ *     summary: Solicitar restablecimiento de contraseña
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - correo
+ *             properties:
+ *               correo:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Restablecimiento de contraseña solicitado exitosamente
+ */
+router.post("/request-password-reset", requestPasswordReset);
+
+/**
+ * @swagger
+ * /api/auth/reset-password:
+ *   post:
+ *     summary: Restablecer contraseña
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - token
+ *               - password
+ *             properties:
+ *               token:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Contraseña restablecida exitosamente
+ */
+router.post("/reset-password", resetPassword);
 
 export default router;

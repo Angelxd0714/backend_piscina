@@ -6,9 +6,11 @@ export interface IUser extends Document {
   apellido: string;
   identificacion: string;
   correo: string;
-  contrasena: string;
+  password: string;
   rol: UserRoles;
   estado: UserStatus;
+  resetToken?: string | null;
+  resetTokenExpiry?: Date | null;
   updatedAt: Date;
   createdAt: Date;
   comparePassword(password: string): Promise<boolean>;
