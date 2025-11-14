@@ -32,11 +32,14 @@ export const createPiscinaValidator = [
     .withMessage("Debe haber al menos 1 profundidad"),
 
   body("profundidades").custom((value, { req }) => {
+    console.log("🔍 ANTES:", { type: typeof value, value });
+
     let parsed = value;
 
     if (typeof value === "string") {
       try {
         parsed = JSON.parse(value);
+        console.log("✅ Parseado de string:", parsed);
       } catch (e) {
         throw new Error("Profundidades debe ser un JSON válido");
       }
@@ -46,13 +49,19 @@ export const createPiscinaValidator = [
       throw new Error("Profundidades debe ser un array");
     }
 
-    parsed = parsed.map((p) => parseFloat(p));
+    parsed = parsed.map((p) => {
+      const num = parseFloat(p);
+      console.log(`Convirtiendo "${p}" -> ${num}`);
+      return num;
+    });
+
+    console.log("🔍 DESPUÉS:", { type: typeof parsed, value: parsed });
 
     if (parsed.length === 0) {
       throw new Error("Debe proporcionar al menos 1 profundidad");
     }
 
-    if (parsed.length != req.body.totalProfundidades) {
+    if (parsed.length !== req.body.totalProfundidades) {
       throw new Error("La cantidad de profundidades no coincide con el total");
     }
 
@@ -63,6 +72,10 @@ export const createPiscinaValidator = [
     }
 
     req.body.profundidades = parsed;
+    console.log(
+      "✅ req.body.profundidades actualizado:",
+      req.body.profundidades,
+    );
     return true;
   }),
 
