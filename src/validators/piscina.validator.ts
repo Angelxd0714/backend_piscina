@@ -33,6 +33,7 @@ export const createPiscinaValidator = [
 
   body("profundidades").custom((value, { req }) => {
     let parsed = value;
+
     if (typeof value === "string") {
       try {
         parsed = JSON.parse(value);
@@ -40,29 +41,28 @@ export const createPiscinaValidator = [
         throw new Error("Profundidades debe ser un JSON válido");
       }
     }
-    req.body.profundidades = parsed;
 
     if (!Array.isArray(parsed)) {
       throw new Error("Profundidades debe ser un array");
     }
+
+    parsed = parsed.map((p) => parseFloat(p));
+
     if (parsed.length === 0) {
       throw new Error("Debe proporcionar al menos 1 profundidad");
     }
-    if (parsed.length != req.body.totalProfundidades) {
-      console.log("La bomba", req.body.bombas.length, "totalBombas");
-      console.log(
-        "Profundidades",
-        parsed.length,
-        "totalProfundidades",
-        req.body.totalProfundidades,
-      );
+
+    if (parsed.length !== req.body.totalProfundidades) {
       throw new Error("La cantidad de profundidades no coincide con el total");
     }
+
     for (let i = 1; i < parsed.length; i++) {
-      if (parseFloat(parsed[i]) <= parseFloat(parsed[i - 1])) {
+      if (parsed[i] <= parsed[i - 1]) {
         throw new Error("Las profundidades deben estar en orden ascendente");
       }
     }
+
+    req.body.profundidades = parsed;
     return true;
   }),
 
@@ -74,6 +74,7 @@ export const createPiscinaValidator = [
 
   body("bombas").custom((value, { req }) => {
     let parsed = value;
+
     if (typeof value === "string") {
       try {
         parsed = JSON.parse(value);
@@ -81,11 +82,11 @@ export const createPiscinaValidator = [
         throw new Error("Bombas debe ser un JSON válido");
       }
     }
-    req.body.bombas = parsed;
 
     if (!Array.isArray(parsed)) {
       throw new Error("Bombas debe ser un array");
     }
+
     if (parsed.length === 0) {
       throw new Error("Debe agregar al menos 1 bomba");
     }
@@ -108,13 +109,14 @@ export const createPiscinaValidator = [
           `El material de la bomba ${index} debe ser "Sumergible" o "Centrifuga"`,
         );
       }
-      if (bomba.totalBombas == req.body.bombas.length) {
-        console.log("La bomba", req.body.bombas.length, "totalBombas");
+      if (bomba.seRepite === "si" && !bomba.totalBombas) {
         throw new Error(
           `La bomba ${index} requiere el campo totalBombas cuando seRepite es "si"`,
         );
       }
     });
+
+    req.body.bombas = parsed;
     return true;
   }),
 ];
