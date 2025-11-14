@@ -102,11 +102,7 @@ export const createPiscinaValidator = [
         );
       }
       if (bomba.totalBombas == req.body.bombas.length) {
-        console.log(
-          "La bomba",
-          req.body.bombas.length,
-          "requiere el campo totalBombas cuando seRepite es 'si'",
-        );
+        console.log("La bomba", req.body.bombas.length, "totalBombas");
         throw new Error(
           `La bomba ${index} requiere el campo totalBombas cuando seRepite es "si"`,
         );
