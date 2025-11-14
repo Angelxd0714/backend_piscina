@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import Piscina from "../models/Piscina";
-import { IBomba } from "../models/Piscina";
+import { IBomba } from "../models/interfaces/Piscina.interface";
 import { successResponse, errorResponse } from "../utils/responses";
 import { validationResult } from "express-validator";
 import { uploadFile } from "../utils/fileUpload";

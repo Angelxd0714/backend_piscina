@@ -1,19 +1,7 @@
 import { Schema, model, Document } from "mongoose";
 import bcrypt from "bcryptjs";
 import { UserRoles, UserStatus } from "./dto/User.enum";
-export interface IUser extends Document {
-  _id: any;
-  nombre: string;
-  apellido: string;
-  identificacion: string;
-  correo: string;
-  contrasena: string;
-  rol: UserRoles;
-  estado: UserStatus;
-  updatedAt: Date;
-  createdAt: Date;
-  comparePassword(password: string): Promise<boolean>;
-}
+import { IUser } from "./interfaces/User.interface";
 
 const userSchema = new Schema(
   {
