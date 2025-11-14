@@ -2,7 +2,7 @@ import { Response } from "express";
 
 export const successResponse = (
   res: Response,
-  data: any,
+  data: unknown,
   message = "Operación exitosa",
   statusCode = 200,
 ) => {
@@ -17,7 +17,7 @@ export const errorResponse = (
   res: Response,
   message = "Error en el servidor",
   statusCode = 500,
-  errors?: any,
+  errors?: unknown,
 ) => {
   return res.status(statusCode).json({
     success: false,

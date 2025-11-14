@@ -106,7 +106,8 @@ export const getAllPiscinas = async (
   res: Response,
 ): Promise<void> => {
   try {
-    const piscinas = await Piscina.find();
+    const piscinas = await Piscina.find().sort({ createdAt: -1 });
+
     successResponse(res, piscinas);
   } catch (error: any) {
     errorResponse(res, error.message);

@@ -66,6 +66,7 @@ export const createPiscinaValidator = [
 
   body("bombas")
     .custom((value) => {
+      console.log(value);
       if (!Array.isArray(value)) {
         throw new Error("Bombas debe ser un array");
       }
