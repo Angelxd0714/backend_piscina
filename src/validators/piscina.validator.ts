@@ -101,7 +101,12 @@ export const createPiscinaValidator = [
           `El material de la bomba ${index} debe ser "Sumergible" o "Centrifuga"`,
         );
       }
-      if (bomba.seRepite === "si" && !bomba.totalBombas) {
+      if (bomba.totalBombas == req.body.bombas.length) {
+        console.log(
+          "La bomba",
+          req.body.bombas.length,
+          "requiere el campo totalBombas cuando seRepite es 'si'",
+        );
         throw new Error(
           `La bomba ${index} requiere el campo totalBombas cuando seRepite es "si"`,
         );
