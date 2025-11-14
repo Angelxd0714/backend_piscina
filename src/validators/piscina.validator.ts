@@ -31,32 +31,33 @@ export const createPiscinaValidator = [
     .isInt({ min: 1 })
     .withMessage("Debe haber al menos 1 profundidad"),
 
-  body("profundidades")
-    .custom((value) => {
-      if (!Array.isArray(value)) {
-        throw new Error("Profundidades debe ser un array");
+  body("profundidades").custom((value, { req }) => {
+    let parsed = value;
+    if (typeof value === "string") {
+      try {
+        parsed = JSON.parse(value);
+      } catch (e) {
+        throw new Error("Profundidades debe ser un JSON válido");
       }
-      if (value.length === 0) {
-        throw new Error("Debe proporcionar al menos 1 profundidad");
+    }
+    req.body.profundidades = parsed;
+
+    if (!Array.isArray(parsed)) {
+      throw new Error("Profundidades debe ser un array");
+    }
+    if (parsed.length === 0) {
+      throw new Error("Debe proporcionar al menos 1 profundidad");
+    }
+    if (parsed.length !== req.body.totalProfundidades) {
+      throw new Error("La cantidad de profundidades no coincide con el total");
+    }
+    for (let i = 1; i < parsed.length; i++) {
+      if (parseFloat(parsed[i]) <= parseFloat(parsed[i - 1])) {
+        throw new Error("Las profundidades deben estar en orden ascendente");
       }
-      return true;
-    })
-    .custom((value, { req }) => {
-      if (value.length !== req.body.totalProfundidades) {
-        throw new Error(
-          "La cantidad de profundidades no coincide con el total",
-        );
-      }
-      return true;
-    })
-    .custom((value) => {
-      for (let i = 1; i < value.length; i++) {
-        if (value[i] <= value[i - 1]) {
-          throw new Error("Las profundidades deben estar en orden ascendente");
-        }
-      }
-      return true;
-    }),
+    }
+    return true;
+  }),
 
   body("forma").isIn(Object.values(Forma)).withMessage("Forma inválida"),
 
@@ -64,42 +65,48 @@ export const createPiscinaValidator = [
 
   body("filtros").trim().notEmpty().withMessage("Los filtros son requeridos"),
 
-  body("bombas")
-    .custom((value) => {
-      console.log(value);
-      if (!Array.isArray(value)) {
-        throw new Error("Bombas debe ser un array");
+  body("bombas").custom((value, { req }) => {
+    let parsed = value;
+    if (typeof value === "string") {
+      try {
+        parsed = JSON.parse(value);
+      } catch (e) {
+        throw new Error("Bombas debe ser un JSON válido");
       }
-      if (value.length === 0) {
-        throw new Error("Debe agregar al menos 1 bomba");
+    }
+    req.body.bombas = parsed;
+
+    if (!Array.isArray(parsed)) {
+      throw new Error("Bombas debe ser un array");
+    }
+    if (parsed.length === 0) {
+      throw new Error("Debe agregar al menos 1 bomba");
+    }
+
+    parsed.forEach((bomba: any, index: number) => {
+      if (!bomba.marca) {
+        throw new Error(`La marca de la bomba ${index} es requerida`);
       }
-      return true;
-    })
-    .custom((value) => {
-      value.forEach((bomba: any, index: number) => {
-        if (!bomba.marca) {
-          throw new Error(`La marca de la bomba ${index} es requerida`);
-        }
-        if (!bomba.referencia) {
-          throw new Error(`La referencia de la bomba ${index} es requerida`);
-        }
-        if (!bomba.potencia) {
-          throw new Error(`La potencia de la bomba ${index} es requerida`);
-        }
-        if (!bomba.material) {
-          throw new Error(`El material de la bomba ${index} es requerido`);
-        }
-        if (!["Sumergible", "Centrifuga"].includes(bomba.material)) {
-          throw new Error(
-            `El material de la bomba ${index} debe ser "Sumergible" o "Centrifuga"`,
-          );
-        }
-        if (bomba.seRepite === "si" && !bomba.totalBombas) {
-          throw new Error(
-            `La bomba ${index} requiere el campo totalBombas cuando seRepite es "si"`,
-          );
-        }
-      });
-      return true;
-    }),
+      if (!bomba.referencia) {
+        throw new Error(`La referencia de la bomba ${index} es requerida`);
+      }
+      if (!bomba.potencia) {
+        throw new Error(`La potencia de la bomba ${index} es requerida`);
+      }
+      if (!bomba.material) {
+        throw new Error(`El material de la bomba ${index} es requerido`);
+      }
+      if (!["Sumergible", "Centrifuga"].includes(bomba.material)) {
+        throw new Error(
+          `El material de la bomba ${index} debe ser "Sumergible" o "Centrifuga"`,
+        );
+      }
+      if (bomba.seRepite === "si" && !bomba.totalBombas) {
+        throw new Error(
+          `La bomba ${index} requiere el campo totalBombas cuando seRepite es "si"`,
+        );
+      }
+    });
+    return true;
+  }),
 ];
