@@ -16,7 +16,11 @@ export const createPiscina = async (
       errorResponse(res, "Errores de validación", 400, errors.array());
       return;
     }
-
+    console.log("✅ Validación pasada");
+    console.log("req.body.profundidades ANTES:", {
+      type: typeof req.body.profundidades,
+      value: req.body.profundidades,
+    });
     let bombas = [];
     if (typeof req.body.bombas === "string") {
       bombas = JSON.parse(req.body.bombas);
