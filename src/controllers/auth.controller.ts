@@ -162,30 +162,34 @@ export const requestPasswordReset = async (
     await user.save();
 
     const resetLink = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+    try {
+      const transporter = nodemailer.createTransport({
+        host: "smtp.gmail.com",
+        port: 465,
+        secure: true,
+        auth: {
+          user: process.env.EMAIL,
+          pass: process.env.EMAIL_PASSWORD,
+        },
+      });
 
-    const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 465,
-      secure: true,
-      auth: {
-        user: process.env.EMAIL,
-        pass: process.env.EMAIL_PASSWORD,
-      },
-    });
+      await transporter.sendMail({
+        from: process.env.EMAIL,
+        to: correo,
+        subject: "Recuperar contraseña",
+        html: `
+          <h2>Recuperar contraseña</h2>
+          <p>Haz clic en el siguiente link para resetear tu contraseña:</p>
+          <a href="${resetLink}">Resetear contraseña</a>
+          <p>Este link expira en 20 minutos.</p>
+        `,
+      });
 
-    await transporter.sendMail({
-      from: process.env.EMAIL,
-      to: correo,
-      subject: "Recuperar contraseña",
-      html: `
-        <h2>Recuperar contraseña</h2>
-        <p>Haz clic en el siguiente link para resetear tu contraseña:</p>
-        <a href="${resetLink}">Resetear contraseña</a>
-        <p>Este link expira en 20 minutos.</p>
-      `,
-    });
-
-    successResponse(res, {}, "Email de recuperación enviado", 200);
+      successResponse(res, {}, "Email de recuperación enviado", 200);
+    } catch (error: any) {
+      console.error("❌ Error en requestPasswordReset:", error);
+      errorResponse(res, error.message);
+    }
   } catch (error: any) {
     console.error("❌ Error en requestPasswordReset:", error);
     errorResponse(res, error.message);
