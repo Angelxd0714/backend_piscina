@@ -159,7 +159,8 @@ export const requestPasswordReset = async (req: Request, res: Response) => {
     await user.save();
 
     const resetLink = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
-
+    console.log(`Enviando email de recuperación a ${correo}`);
+    console.log(`Enviando email desde ${process.env.EMAIL}`);
     await resend.emails.send({
       from: process.env.EMAIL || "no-reply@example.com",
       to: correo,
