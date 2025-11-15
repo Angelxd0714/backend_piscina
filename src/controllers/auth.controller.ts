@@ -5,11 +5,11 @@ import { User } from "../models/User";
 import { successResponse, errorResponse } from "../utils/responses";
 import { validationResult } from "express-validator";
 import dotenv from "dotenv";
-import { Resend } from "resend";
+import sgMail from "@sendgrid/mail";
 
 dotenv.config();
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+sgMail.setApiKey(process.env.API_KEY || "");
 
 const JWT_SECRET = process.env.JWT_SECRET || "tu_secreto_por_defecto";
 const JWT_EXPIRES_IN = Number(process.env.JWT_EXPIRES_IN) || 3600;
@@ -161,16 +161,14 @@ export const requestPasswordReset = async (req: Request, res: Response) => {
     const resetLink = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
     console.log(`Enviando email de recuperación a ${correo}`);
     console.log(`Enviando email desde ${process.env.EMAIL}`);
-    await resend.emails.send({
-      from: process.env.EMAIL || "no-reply@example.com",
+    await sgMail.send({
       to: correo,
+      from: "noreply@sendgrid.net",
       subject: "Recuperar contraseña",
       html: `
-        <h2>Recuperar contraseña</h2>
-        <p>Haz clic en el siguiente link para resetear tu contraseña:</p>
-        <a href="${resetLink}">Resetear contraseña</a>
-        <p>Este link expira en 20 minutos.</p>
-      `,
+         <h2>Recuperar contraseña</h2>
+         <a href="${resetLink}">Resetear contraseña</a>
+       `,
     });
 
     successResponse(res, {}, "Email de recuperación enviado", 200);
