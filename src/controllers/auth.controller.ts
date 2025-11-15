@@ -5,9 +5,11 @@ import { User } from "../models/User";
 import { successResponse, errorResponse } from "../utils/responses";
 import { validationResult } from "express-validator";
 import dotenv from "dotenv";
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 
 dotenv.config();
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const JWT_SECRET = process.env.JWT_SECRET || "tu_secreto_por_defecto";
 const JWT_EXPIRES_IN = Number(process.env.JWT_EXPIRES_IN) || 3600;
@@ -134,67 +136,46 @@ export const logout = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-export const requestPasswordReset = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
+export const requestPasswordReset = async (req: Request, res: Response) => {
   try {
     const { correo } = req.body;
 
-    if (!correo) {
-      errorResponse(res, "El correo es requerido", 400);
-      return;
-    }
-
     const user = await User.findOne({ correo });
-
     if (!user) {
       errorResponse(res, "Usuario no encontrado", 404);
       return;
     }
 
-    const resetToken = jwt.sign({ userId: user._id, correo }, JWT_SECRET, {
-      expiresIn: "20m",
-    });
+    const resetToken = jwt.sign(
+      { userId: user._id, correo: user.correo },
+      JWT_SECRET,
+      {
+        expiresIn: JWT_EXPIRES_IN,
+      },
+    );
 
     user.resetToken = resetToken;
     user.resetTokenExpiry = new Date(Date.now() + 20 * 60 * 1000);
     await user.save();
 
     const resetLink = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
-    try {
-      const transporter = nodemailer.createTransport({
-        host: "smtp.gmail.com",
-        port: 587,
-        secure: false,
-        auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASSWORD,
-        },
-        connectionTimeout: 10000,
-        socketTimeout: 10000,
-      });
 
-      await transporter.sendMail({
-        from: process.env.EMAIL,
-        to: correo,
-        subject: "Recuperar contraseña",
-        html: `
-          <h2>Recuperar contraseña</h2>
-          <p>Haz clic en el siguiente link para resetear tu contraseña:</p>
-          <a href="${resetLink}">Resetear contraseña</a>
-          <p>Este link expira en 20 minutos.</p>
-        `,
-      });
+    await resend.emails.send({
+      from: process.env.EMAIL || "no-reply@example.com",
+      to: correo,
+      subject: "Recuperar contraseña",
+      html: `
+        <h2>Recuperar contraseña</h2>
+        <p>Haz clic en el siguiente link para resetear tu contraseña:</p>
+        <a href="${resetLink}">Resetear contraseña</a>
+        <p>Este link expira en 20 minutos.</p>
+      `,
+    });
 
-      successResponse(res, {}, "Email de recuperación enviado", 200);
-    } catch (error: any) {
-      console.error("❌ Error en requestPasswordReset:", error);
-      errorResponse(res, error.message);
-    }
+    successResponse(res, {}, "Email de recuperación enviado", 200);
   } catch (error: any) {
-    console.error("❌ Error en requestPasswordReset:", error);
-    errorResponse(res, error.message);
+    console.error("❌ Error:", error);
+    errorResponse(res, "Error al enviar el correo");
   }
 };
 
